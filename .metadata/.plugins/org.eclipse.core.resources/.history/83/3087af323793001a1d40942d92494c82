@@ -1,0 +1,14 @@
+package com.webflux.client.app;
+
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AppConfig {
+	@Value("${config.base.endpoint}")
+	private String url;
+	
+	@Bean
+	public WebClient registrarWebClient() {
+		return WebClient.create(url);
+	}
+}

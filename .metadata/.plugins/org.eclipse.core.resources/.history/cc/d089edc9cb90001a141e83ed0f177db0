@@ -1,0 +1,15 @@
+package com.webflux.app;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.webflux.app.models.services.IProductoService;
+
+public class RouterFunctionConfig {
+	
+	@Autowired
+	private IProductoService iProductoService;
+	
+	public RouterFunction<ServerResponse> routes(){
+		
+	}
+}

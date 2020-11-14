@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://wwww.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title th:text="${titulo}">Insert title here</title>
+</head>
+<body>
+<h1 th:text="${titulo}"></h1>
+
+<!--emmet: table>(thead>tr>th*4)+tbody>tr>td*4 -->
+<table>
+	<thead>
+		<tr>
+			<th>id</th>
+			<th>nombre</th>
+			<th>precio</th>
+			<th>fecha</th>
+		</tr>
+	</thead>
+	<tbody>
+<!-- 	Estamos dentro del observador que se esta mostrando cada item del observable -->
+		<tr th:each="producto: ${productos}">
+			<td th:text="${producto.id}"></td>
+			<td th:text="${producto.nombre}"></td>
+			<td th:text="${producto.precio}"></td>
+			<td th:text="${producto.createAt}"></td>
+		</tr>
+	</tbody>
+</table>
+</body>
+</html>

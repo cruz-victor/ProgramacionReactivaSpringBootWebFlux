@@ -1,0 +1,5 @@
+package com.webflux.client.app.services;
+
+public interface ProductoService {
+
+}

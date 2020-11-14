@@ -1,0 +1,77 @@
+package com.webflux.app.handler;
+
+import java.net.URI;
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
+
+import com.webflux.app.models.documents.Producto;
+import com.webflux.app.models.services.IProductoService;
+
+import reactor.core.publisher.Mono;
+
+@Component //Es el controlador, pero no antonar con @Conteller
+public class ProductoHandler {
+
+	@Autowired
+	private IProductoService iProductoService;	
+	
+	public Mono<ServerResponse> listar(ServerRequest request) {
+		return ServerResponse.ok()
+				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.body(iProductoService.findAll(),Producto.class);
+	}
+	
+	
+	public Mono<ServerResponse> ver (ServerRequest request){
+		String id=request.pathVariable("id");
+		
+		return iProductoService.findById(id) //
+				.flatMap(p->ServerResponse //Conver el serverResonse a un Mono<ServerResponse>
+						.ok() //200
+						.contentType(MediaType.APPLICATION_JSON_UTF8) //opcional
+						.body(BodyInserters.fromObject(p)))//Recibe un publishe del tipo mono o flux. P como no es un tipo reactivo  usamos inserters
+				.switchIfEmpty(ServerResponse.notFound().build());	//build retorna un Mono<ServerResponse>										
+	}
+	
+	public Mono<ServerResponse> crear(ServerRequest request){
+		Mono<Producto> producto=request.bodyToMono(Producto.class);//Convertir los datos del request en un Mono 
+		
+		return producto.flatMap(p->{ //Para emitir el producto
+			if(p.getCreateAt()==null) {
+				p.setCreateAt(new Date());
+			}
+			
+			return iProductoService.save(p);//Guardar en base de datos
+		}).flatMap(p->ServerResponse  //Una vez guardado se tiene que convertir al tipo Mono<ServerResponse>
+				.created(URI.create("/api/v2/productos/".concat(p.getId())))
+				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.body(BodyInserters.fromObject(p)));	
+	}
+	
+	public Mono<ServerResponse> editar(ServerRequest request){
+		Mono<Producto> producto = request.bodyToMono(Producto.class);//Convertir los datos del request en un Mono
+		String id=request.pathVariable("id");
+		
+		Mono<Producto> productoDb=iProductoService.findById(id);
+		
+		return productoDb.zipWith(producto, (db, req) ->{
+			db.setNombre(req.getNombre());
+			db.setPrecio(req.getPrecio());
+			db.setCategoria(req.getCategoria());
+			
+			return db;
+			
+		}).flatMap(p->ServerResponse
+				.created(URI.create("api/v2/productos/".concat(p.getId())))
+				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.body(iProductoService.save(p), Producto.class))
+				.switchIfEmpty(ServerResponse.notFound().build());						
+	}
+
+}

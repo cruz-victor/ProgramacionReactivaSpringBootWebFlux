@@ -1,0 +1,24 @@
+package com.webflux.app;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+
+import com.webflux.app.models.documents.Producto;
+import com.webflux.app.models.services.IProductoService;
+
+public class RouterFunctionConfig {
+	
+	@Autowired
+	private IProductoService iProductoService;
+	
+	public RouterFunction<ServerResponse> routes(){
+		return route(GET("/api/v2/productos"), request -> {
+			return ServerResponse.ok()
+					.contentType(MediaType.APPLICATION_JSON_UTF8)
+					.body(iProductoService.findAll(),Producto.class);
+		});		
+	}
+}

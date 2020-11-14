@@ -1,0 +1,103 @@
+package com.webflux.app;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+import com.webflux.app.models.documents.Categoria;
+import com.webflux.app.models.documents.Producto;
+import com.webflux.app.models.services.IProductoService;
+
+import reactor.core.publisher.Mono;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) //Le indica que tome la configuracion pricipal de la aplicacion. Toma todo el aplication context de spring
+class SpringBootWebfluxApirestApplicationTests {
+
+	@Autowired
+	private WebTestClient client;
+	
+	@Autowired
+	private IProductoService iProductoService;
+	/*
+	@Test
+	public void listarTest() {
+		client.get() //peticion GET
+		.uri("/api/v2/productos")//endpoint
+		.accept(MediaType.APPLICATION_JSON_UTF8)//Consumir un mediatype		
+		.exchange() //enviar el request al endpoint y consumir el response
+		.expectStatus().isOk() //ok=200
+		.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)//cabecera
+		.expectBodyList(Producto.class)//la respuesta retorna un list de productos
+		.hasSize(9);//Nro de elementos de la lista
+	}
+	*/
+	
+	@Test
+	public void listarTest() {
+		client.get() //peticion GET
+		.uri("/api/v2/productos")//endpoint
+		.accept(MediaType.APPLICATION_JSON_UTF8)//Consumir un mediatype		
+		.exchange() //enviar el request al endpoint y consumir el response
+		.expectStatus().isOk() //ok=200
+		.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)//cabecera
+		.expectBodyList(Producto.class)//la respuesta retorna un list de productos
+		.consumeWith(response -> {
+			List<Producto> productos=response.getResponseBody();
+			productos.forEach(p->{
+				System.out.println("test:"+p.getNombre());
+			});
+			
+			Assertions.assertThat(productos.size()==9).isTrue();			
+		});
+	}
+	
+	
+	@Test
+	public void verTest() {
+		//Las pruebas unitarias no se pueden trabajar dentro de un subscribe
+		//Es necesario que sean sincronos
+		Producto producto = iProductoService.findByNombre("television 1").block();
+		System.out.println("Id--->"+producto.getId());
+		System.out.println("Nombre--->"+producto.getNombre());
+		
+		client.get() //peticion GET
+		.uri("/api/v2/productos/{id}",Collections.singletonMap("id", producto.getId()))//endpoint
+		.accept(MediaType.APPLICATION_JSON_UTF8)//Consumir un mediatype		
+		.exchange() //enviar el request al endpoint y consumir el response
+		.expectStatus().isOk() //ok=200
+		.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)//cabecera
+		.expectBody(Producto.class)
+		.consumeWith(response->{
+			Producto p=response.getResponseBody();
+			//Evaluaciones
+			Assertions.assertThat(p.getId()).isNotEmpty();
+			Assertions.assertThat(p.getId().length()>0).isTrue();
+			Assertions.assertThat(p.getNombre()).isEqualTo("television 1");
+		});
+		
+		/*.expectBody()
+		.jsonPath("$.id").isNotEmpty()
+		.jsonPath("$.nombre").isEqualTo("television 1");*/
+		
+	}
+	
+	@Test
+	public void crearTest() {
+		Categoria categoria=iProductoService.findCategoriaByNombre("muebles").block();
+		Producto producto=new Producto("Mesa comedor test",100.00, categoria);
+		
+		client.post()
+		.uri("/api/v2/productos")
+		.contentType(MediaType.APPLICATION_JSON_UTF8)
+		.accept(MediaType.APPLICATION_JSON_UTF8)
+		.body(Mono.just(producto), Producto.class);//Acepta un publiser observable del tipo Mono
+	}
+}
+
+

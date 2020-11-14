@@ -1,0 +1,6 @@
+package com.webflux.client.app;
+
+@Configuration
+public class AppConfig {
+
+}

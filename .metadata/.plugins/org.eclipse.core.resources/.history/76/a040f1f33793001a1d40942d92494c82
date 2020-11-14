@@ -1,0 +1,5 @@
+package com.webflux.client.app.dto;
+
+public class Categoria {
+
+}

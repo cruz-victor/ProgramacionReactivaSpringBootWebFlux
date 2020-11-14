@@ -1,0 +1,7 @@
+content_assist_lru_history=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><history maxLHS\="100" maxRHS\="10"><lhs name\="java.time.temporal.TemporalAmount"><rhs name\="java.time.Duration"/></lhs><lhs name\="org.springframework.util.MimeType"><rhs name\="org.springframework.http.MediaType"/></lhs><lhs name\="org.springframework.http.MediaType"><rhs name\="org.springframework.http.MediaType"/></lhs><lhs name\="java.lang.Enum"><rhs name\="org.springframework.boot.test.context.SpringBootTest$WebEnvironment"/><rhs name\="org.springframework.http.HttpStatus"/></lhs><lhs name\="java.lang.constant.Constable"><rhs name\="org.springframework.boot.test.context.SpringBootTest$WebEnvironment"/><rhs name\="org.springframework.http.HttpStatus"/></lhs><lhs name\="com.webflux.app.models.documents.Producto"><rhs name\="com.webflux.app.models.documents.Producto"/></lhs></history>
+content_assist_number_of_computers=17
+eclipse.preferences.version=1
+org.eclipse.jdt.ui.formatterprofiles.version=18
+spelling_locale_initialized=true
+useAnnotationsPrefPage=true
+useQuickDiffPrefPage=true

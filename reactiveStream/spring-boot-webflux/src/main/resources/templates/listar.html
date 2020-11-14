@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://wwww.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title th:text="${titulo}">Insert title here</title>
+</head>
+<body>
+<div th:if="${param.error!=null}" th:text="${param.error}"></div>
+<div th:if="${param.success!=null}" th:text="${param.success}"></div>
+
+<h1 th:text="${titulo}"></h1>
+
+<a th:href="@{/form}">crear +</a>
+<!--emmet: table>(thead>tr>th*4)+tbody>tr>td*4 -->
+<table>
+	<thead>
+		<tr>
+			<th>id</th>
+			<th>nombre</th>
+			<th>precio</th>
+			<th>fecha</th>
+			<th>categoria</th>
+			<th>editar</th>
+			<th>eliminar</th>
+		</tr>
+	</thead>
+	<tbody>
+<!-- 	Estamos dentro del observador que se esta mostrando cada item del observable -->
+		<tr th:each="producto: ${productos}">
+			<td><a th:href="@{/ver/}+${producto.id}" th:text="${#strings.abbreviate(producto.id,10)}"></a></td>
+			<td th:text="${producto.nombre}"></td>
+			<td th:text="${#numbers.formatCurrency(producto.precio)}"></td>
+			<td th:text="${#calendars.format(producto.createAt, 'dd/MM/yyyy')}"></td>
+			<td th:text="${producto.categoria.nombre}"></td>
+			<td><a th:href="@{/form/} + ${producto.id}">editar</a></td>
+			<td><a th:href="@{/eliminar/} + ${producto.id}" onclick="return confirm('Estas seguro que desea eliminar?');">eliminar</a></td>
+		</tr>
+	</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,12 @@
+package com.webflux.client.app.dto;
+
+import java.util.Date;
+
+public class Producto {
+	private String id;
+	private String nombre;
+	private Double precio;
+	private Date createAt;
+	private String foto;
+	private Categoria categoria;	
+}

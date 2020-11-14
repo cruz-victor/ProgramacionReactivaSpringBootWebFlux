@@ -1,0 +1,71 @@
+package com.vic.webflux.app;
+
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+
+import com.vic.webflux.app.models.dao.IProductoDao;
+import com.vic.webflux.app.models.documents.Categoria;
+import com.vic.webflux.app.models.documents.Producto;
+import com.vic.webflux.app.models.services.IProductoService;
+
+import reactor.core.publisher.Flux;
+
+@SpringBootApplication
+public class SpringBootWebfluxApplication implements CommandLineRunner {
+
+	@Autowired
+	private IProductoService iProductoService;
+	
+	@Autowired
+	private ReactiveMongoTemplate reactiveMongoTemplate;
+	
+	public static void main(String[] args) {
+		SpringApplication.run(SpringBootWebfluxApplication.class, args);
+	}
+
+	@Override
+	public void run(String... args) throws Exception {
+		System.out.println("Inicio");
+		reactiveMongoTemplate.dropCollection("productos").subscribe();
+		reactiveMongoTemplate.dropCollection("categorias").subscribe();				
+		System.out.println("Productor borrados");
+		
+		Categoria electronico=new Categoria("Electronico");
+		Categoria deporte=new Categoria("deporte");
+		Categoria computacion=new Categoria("computacion");
+		Categoria muebles=new Categoria("muebles");
+		
+		Flux.just(electronico,deporte,computacion,muebles)
+		.flatMap(iProductoService::saveCategoria)
+		.doOnNext(c->{
+			System.out.println("Categoria creada: "+c.getNombre()+", id: "+c.getId());			
+		}).thenMany(Flux.just(
+				//Una vez que ha terminado el flujo:
+				//Then, agregar un flujo del tipo Mono
+				//ThenMany agregar otro flujo del tipo Flux
+				new Producto("television 1", 100.10, electronico),
+				new Producto("television 2", 200.10, electronico),
+				new Producto("television 3", 300.10, electronico),
+				new Producto("hp", 400.10, computacion),
+				new Producto("dell", 500.10, computacion),
+				new Producto("television 6", 600.10, computacion),
+				new Producto("television 7", 700.10, electronico),
+				new Producto("mesa", 800.10, muebles),
+				new Producto("silla", 900.10, muebles)
+				)
+		.flatMap(producto-> {
+			producto.setCreateAt(new Date());
+			return iProductoService.save(producto);
+		}))				
+		.subscribe(
+				producto->System.out.println("Insert: "+producto.getId()+" "+producto.getNombre()) //doOnNext
+				);		
+		System.out.println("Productor insertados");
+	}
+
+}
